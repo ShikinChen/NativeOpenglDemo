@@ -8,8 +8,12 @@ cmake_minimum_required(VERSION 3.4.1)
 
 set(PATH_TO_CPP ${CMAKE_SOURCE_DIR}/src/main/cpp)
 
+set(PATH_TO_EGL ${CMAKE_SOURCE_DIR}/src/main/cpp/egl)
+
 file(GLOB PATH_TO_CPP_FILE
-        ${PATH_TO_CPP}/*.cpp)
+        ${PATH_TO_CPP}/*.cpp
+        ${PATH_TO_EGL}/*.cpp
+        )
 
 # Creates and names a library, sets it as either STATIC
 # or SHARED, and provides the relative paths to its source code.

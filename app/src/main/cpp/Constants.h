@@ -1,0 +1,9 @@
+//
+// Created by Shiki on 2020/6/1.
+//
+
+#ifndef NATIVEOPENGLDEMO_CONSTANTS_H
+#define NATIVEOPENGLDEMO_CONSTANTS_H
+const int CODE_ERROR = -1;
+const int CODE_SUCCESS = 0;
+#endif //NATIVEOPENGLDEMO_CONSTANTS_H
