@@ -7,6 +7,7 @@
 #include <GLES2/gl2.h>
 #include "egl/EglThread.h"
 #include "util/ShaderUtil.h"
+#include "matrix/MatrixUtil.h"
 
 ANativeWindow *nativeWindow = NULL;
 EglThread *eglThread = NULL;
@@ -31,23 +32,26 @@ float vertexs[] = {
         -1, 1,
 };
 
+float matrix[16];
+
 //图片
 
 const char *img_vertex = "attribute vec4 v_Position;\n"
-                     "attribute vec2 f_Position;\n"
-                     "varying vec2 ft_Position;\n"
-                     "void main() {\n"
-                     "    ft_Position = f_Position;\n"
-                     "    gl_Position = v_Position;\n"
-                     "}";
+                         "attribute vec2 f_Position;\n"
+                         "varying vec2 ft_Position;\n"
+                         "uniform mat4 u_Matrix;\n"
+                         "void main() {\n"
+                         "    ft_Position = f_Position;\n"
+                         "    gl_Position = v_Position*u_Matrix;\n"
+                         "}";
 
 
 const char *img_fragment = "precision mediump float;\n"
-                       "varying vec2 ft_Position;\n"
-                       "uniform sampler2D sTexture;\n"
-                       "void main() {\n"
-                       "    gl_FragColor=texture2D(sTexture, ft_Position);\n"
-                       "}";
+                           "varying vec2 ft_Position;\n"
+                           "uniform sampler2D sTexture;\n"
+                           "void main() {\n"
+                           "    gl_FragColor=texture2D(sTexture, ft_Position);\n"
+                           "}";
 
 
 float fragments[] = {
@@ -61,6 +65,7 @@ GLint v_Position;
 GLint f_Position;
 GLint sTexture;
 GLuint textureId;
+GLuint u_Matrix;
 
 int width;
 int height;
@@ -77,8 +82,14 @@ void callbackSurfaceCreate(void *context) {
     v_Position = glGetAttribLocation(program, "v_Position");
     f_Position = glGetAttribLocation(program, "f_Position");
     sTexture = glGetUniformLocation(program, "sTexture");
+    u_Matrix = glGetUniformLocation(program, "u_Matrix");
 
     if (sTexture >= 0) {
+        initMatrix(matrix);
+//        rotateMatrixByZ(matrix, 60);
+//        scaleMatrix(matrix, 3.5);
+        transMatrix(matrix, 1, -1);
+
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -113,15 +124,18 @@ void callbackSurfaceDraw(void *context) {
     if (vPosition >= 0) {
         glEnableVertexAttribArray(vPosition);
         glVertexAttribPointer(vPosition, 2, GL_FLOAT, false, 8, vertexs);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / (sizeof(float)*2));
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / (sizeof(float) * 2));
     }
 
     //图片
     if (v_Position >= 0) {
+        glUniformMatrix4fv(u_Matrix, 1, GL_FALSE, matrix);
+
 
         //绑定第五个纹理
         glActiveTexture(GL_TEXTURE5);
         glUniform1i(sTexture, 5);
+
 
         glBindTexture(GL_TEXTURE_2D, textureId);
 
@@ -130,7 +144,7 @@ void callbackSurfaceDraw(void *context) {
 
         glEnableVertexAttribArray(f_Position);
         glVertexAttribPointer(f_Position, 2, GL_FLOAT, false, 8, fragments);
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / (sizeof(float)*2));
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / (sizeof(float) * 2));
         glBindTexture(GL_TEXTURE_2D, 0);
     }
 
