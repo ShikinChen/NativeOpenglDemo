@@ -10,7 +10,7 @@
 
 ANativeWindow *nativeWindow = NULL;
 EglThread *eglThread = NULL;
-
+//矩形
 const char *vertex = "attribute vec4 a_position;\n"
                      "\n"
                      "void main(){\n"
@@ -21,22 +21,79 @@ const char *fragment = "precision mediump float;\n"
                        "void main(){\n"
                        "    gl_FragColor = vec4(1f,0f,0f,1f);\n"
                        "}";
+
 int program;
 GLint vPosition;
 float vertexs[] = {
-        -1, -1,
         1, -1,
-        -1, 1,
-
         1, 1,
+        -1, -1,
+        -1, 1,
 };
+
+//图片
+
+const char *img_vertex = "attribute vec4 v_Position;\n"
+                     "attribute vec2 f_Position;\n"
+                     "varying vec2 ft_Position;\n"
+                     "void main() {\n"
+                     "    ft_Position = f_Position;\n"
+                     "    gl_Position = v_Position;\n"
+                     "}";
+
+
+const char *img_fragment = "precision mediump float;\n"
+                       "varying vec2 ft_Position;\n"
+                       "uniform sampler2D sTexture;\n"
+                       "void main() {\n"
+                       "    gl_FragColor=texture2D(sTexture, ft_Position);\n"
+                       "}";
+
+
+float fragments[] = {
+        1, 1,
+        1, 0,
+        0, 1,
+        0, 0,
+};
+
+GLint v_Position;
+GLint f_Position;
+GLint sTexture;
+GLuint textureId;
+
+int width;
+int height;
+void *pixels = NULL;
 
 void callbackSurfaceCreate(void *context) {
     EglThread *eglThread = static_cast<EglThread *>(context);
-    program = createProgram(vertex, fragment);
+    program = createProgram(img_vertex, img_fragment);
     LOGD("opengl program %d", program)
-
+    //矩形
     vPosition = glGetAttribLocation(program, "a_position");
+
+    //图片
+    v_Position = glGetAttribLocation(program, "v_Position");
+    f_Position = glGetAttribLocation(program, "f_Position");
+    sTexture = glGetUniformLocation(program, "sTexture");
+
+    if (sTexture >= 0) {
+        glGenTextures(1, &textureId);
+        glBindTexture(GL_TEXTURE_2D, textureId);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        if (pixels != NULL) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+        }
+    }
+
+    //解绑纹理
+    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void callbackSurfaceChange(int width, int height, void *context) {
@@ -51,9 +108,33 @@ void callbackSurfaceDraw(void *context) {
     glClear(GL_COLOR_BUFFER_BIT);
 
     glUseProgram(program);
-    glEnableVertexAttribArray(vPosition);
-    glVertexAttribPointer(vPosition, 2, GL_FLOAT, false, 8, vertexs);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / sizeof(float));
+
+    //矩形
+    if (vPosition >= 0) {
+        glEnableVertexAttribArray(vPosition);
+        glVertexAttribPointer(vPosition, 2, GL_FLOAT, false, 8, vertexs);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / (sizeof(float)*2));
+    }
+
+    //图片
+    if (v_Position >= 0) {
+
+        //绑定第五个纹理
+        glActiveTexture(GL_TEXTURE5);
+        glUniform1i(sTexture, 5);
+
+        glBindTexture(GL_TEXTURE_2D, textureId);
+
+        glEnableVertexAttribArray(v_Position);
+        glVertexAttribPointer(v_Position, 2, GL_FLOAT, false, 8, vertexs);
+
+        glEnableVertexAttribArray(f_Position);
+        glVertexAttribPointer(f_Position, 2, GL_FLOAT, false, 8, fragments);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, sizeof(vertexs) / (sizeof(float)*2));
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+
 }
 
 extern "C"
@@ -75,4 +156,18 @@ Java_me_shiki_nativeopengldemo_NativeOpengl_surfaceChange(JNIEnv *env, jobject t
     if (eglThread != NULL) {
         eglThread->onSurfaceChange(width, height);
     }
+}extern "C"
+JNIEXPORT void JNICALL
+Java_me_shiki_nativeopengldemo_NativeOpengl_imgData(JNIEnv *env, jobject thiz, jint w, jint h, jint length,
+                                                    jbyteArray data_) {
+
+    jbyte *data = env->GetByteArrayElements(data_, NULL);
+
+    width = w;
+    height = h;
+
+    pixels = malloc(length);
+    memcpy(pixels, data, length);
+
+    env->ReleaseByteArrayElements(data_, data, 0);
 }
