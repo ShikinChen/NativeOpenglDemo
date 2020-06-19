@@ -70,6 +70,7 @@ void EglThread::onSurfaceChange(int width, int height) {
     isChange = true;
     surfaceHeight = height;
     surfaceWidth = width;
+    notifyRender();
 }
 
 void EglThread::callBackOnCeate(EglThread::OnCreate onCreate, void *context) {
