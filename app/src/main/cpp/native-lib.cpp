@@ -88,7 +88,8 @@ void callbackSurfaceCreate(void *context) {
         initMatrix(matrix);
 //        rotateMatrixByZ(matrix, 60);
 //        scaleMatrix(matrix, 3.5);
-        transMatrix(matrix, 1, -1);
+//        transMatrix(matrix, 1, -1);
+
 
         glGenTextures(1, &textureId);
         glBindTexture(GL_TEXTURE_2D, textureId);
@@ -107,9 +108,20 @@ void callbackSurfaceCreate(void *context) {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void callbackSurfaceChange(int width, int height, void *context) {
+void callbackSurfaceChange(int w, int h, void *context) {
     EglThread *eglThread = static_cast<EglThread *>(context);
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, w, h);
+
+    float sreen_r = w * 1.0 / h;
+    float img_r = width * 1.0 / height;
+
+    if (sreen_r > img_r) {//宽度缩放
+        float r = w / (h * 1.0 / height * width);
+        orthoM(matrix, r, 1);
+    } else {//高度缩放
+        float r = h / (w * 1.0 / width * height);
+        orthoM(matrix, 1, r);
+    }
 }
 
 

@@ -82,10 +82,38 @@ static void scaleMatrix(float *matrix, double scale) {
     scaleMatrix(matrix, scale, scale);
 }
 
+/**
+ * 移动
+ * @param matrix
+ * @param transX
+ * @param transY
+ * @param transZ
+ */
 static void transMatrix(float *matrix, double transX, double transY, double transZ = 0) {
     matrix[3] = transX;
     matrix[7] = transY;
     matrix[11] = transZ;
+}
+
+/**
+ * 投影
+ * @param matrix
+ * @param left
+ * @param top
+ * @param right
+ * @param bottom
+ */
+static void orthoM(float *matrix, double left, double right, double top, double bottom) {
+    matrix[0] = 2 / (right - left);
+    matrix[3] = (left + right) / (right - left) * -1;
+    matrix[5] = 2 / (top - bottom);
+    matrix[7] = (top + bottom) / (top - bottom) * -1;
+    matrix[10] = 1;
+    matrix[11] = 1;
+}
+
+static void orthoM(float *matrix, double leftAndRight, double topAndBottom) {
+    orthoM(matrix, leftAndRight, -leftAndRight, topAndBottom, -topAndBottom);
 }
 
 double getAngle(double angle) {
