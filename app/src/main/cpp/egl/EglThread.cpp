@@ -39,7 +39,7 @@ void *eglThreadImpl(void *data) {
         }
 
         if (eglThread->isStart) {
-//            LOGD("draw")
+//            LOGD("onDraw")
             if (eglThread->onDraw != NULL) {
                 eglThread->onDraw(eglThread->onDrawContext);
             }
@@ -54,6 +54,9 @@ void *eglThreadImpl(void *data) {
             pthread_mutex_unlock(&eglThread->pthreadMutex);
         }
     }
+    eglHelper->destoryEgl();
+    delete eglHelper;
+    eglHelper = NULL;
     return 0;
 }
 
@@ -96,4 +99,12 @@ void EglThread::notifyRender() {
     pthread_mutex_lock(&pthreadMutex);
     pthread_cond_signal(&pthreadCond);
     pthread_mutex_unlock(&pthreadMutex);
+}
+
+void EglThread::destory() {
+    isExit = true;
+    notifyRender();
+    pthread_join(eglThread, NULL);
+    nativeWindow = NULL;
+    eglThread = -1;
 }

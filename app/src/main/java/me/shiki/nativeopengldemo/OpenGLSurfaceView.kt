@@ -15,6 +15,8 @@ class OpenGLSurfaceView @JvmOverloads constructor(
 
     var nativeOpengl: NativeOpengl? = null
 
+    var surfaceCreatedListener: (() -> Unit)? = null
+
     init {
         holder?.addCallback(this)
     }
@@ -24,9 +26,11 @@ class OpenGLSurfaceView @JvmOverloads constructor(
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
+        nativeOpengl?.surfaceDestory()
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         nativeOpengl?.surfaceCreate(holder?.surface)
+        surfaceCreatedListener?.invoke()
     }
 }

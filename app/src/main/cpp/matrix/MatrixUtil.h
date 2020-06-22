@@ -5,8 +5,6 @@
 #ifndef NATIVEOPENGLDEMO_MATRIXUTIL_H
 #define NATIVEOPENGLDEMO_MATRIXUTIL_H
 
-double getAngle(double angle);
-
 #include <math.h>
 
 static void initMatrix(float *matrix) {
@@ -18,6 +16,12 @@ static void initMatrix(float *matrix) {
         }
     }
 }
+
+static double getAngle(double angle) {
+    angle = angle * M_PI / 180.0;
+    return angle;
+}
+
 
 /**
  * 沿着Z轴旋转
@@ -113,13 +117,9 @@ static void orthoM(float *matrix, double left, double right, double top, double 
 }
 
 static void orthoM(float *matrix, double leftAndRight, double topAndBottom) {
-    orthoM(matrix, leftAndRight, -leftAndRight, topAndBottom, -topAndBottom);
+    orthoM(matrix, -leftAndRight, leftAndRight, topAndBottom, -topAndBottom);
 }
 
-double getAngle(double angle) {
-    angle = angle * M_PI / 180.0;
-    return angle;
-}
 
 
 #endif //NATIVEOPENGLDEMO_MATRIXUTIL_H

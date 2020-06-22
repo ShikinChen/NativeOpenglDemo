@@ -10,9 +10,12 @@ set(PATH_TO_CPP ${CMAKE_SOURCE_DIR}/src/main/cpp)
 
 set(PATH_TO_EGL ${CMAKE_SOURCE_DIR}/src/main/cpp/egl)
 
+set(PATH_TO_OPENGL ${CMAKE_SOURCE_DIR}/src/main/cpp/opengl)
+
 file(GLOB PATH_TO_CPP_FILE
         ${PATH_TO_CPP}/*.cpp
         ${PATH_TO_EGL}/*.cpp
+        ${PATH_TO_OPENGL}/*.cpp
         )
 
 # Creates and names a library, sets it as either STATIC

@@ -6,10 +6,10 @@
 #define NATIVEOPENGLDEMO_EGLTHREAD_H
 
 #include <pthread.h>
-#include <android/native_window.h>
 #include <EGL/eglplatform.h>
 #include "EglHelper.h"
 #include <unistd.h>
+#include <android/native_window.h>
 #include <android/native_window_jni.h>
 #include <GLES2/gl2.h>
 
@@ -74,6 +74,8 @@ public:
     void setRenderType(RenderType renderType);
 
     void notifyRender();
+
+    void destory();
 };
 
 
