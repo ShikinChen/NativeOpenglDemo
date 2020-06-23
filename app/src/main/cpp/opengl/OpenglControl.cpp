@@ -4,6 +4,10 @@
 
 #include "OpenglControl.h"
 #include "ImgOpengl.h"
+#include "RectangleOpengl.h"
+#include "ImgOpengl.h"
+#include "GrayImgOpengl.h"
+#include "YUVOpengl.h"
 
 OpenglControl::OpenglControl() {
 
@@ -43,6 +47,29 @@ void callbackSurfaceDraw(void *context) {
     }
 }
 
+void callbackSurfaceChangeFilter(int w, int h, void *context) {
+    OpenglControl *openglControl = static_cast<OpenglControl *>(context);
+    if (openglControl != NULL) {
+        if (openglControl->baseOpengl != NULL) {
+            openglControl->baseOpengl->destroy();
+            delete openglControl->baseOpengl;
+            openglControl->baseOpengl = NULL;
+        }
+        openglControl->baseOpengl = new GrayImgOpengl();
+        openglControl->baseOpengl->onCreate();
+        openglControl->baseOpengl->onChange(w, h);
+        openglControl->baseOpengl->setPixel(openglControl->pixel, openglControl->imgWidth, openglControl->imgHeight);
+
+    }
+}
+
+void callbackSurfaceDestroy(void *context) {
+    OpenglControl *openglControl = static_cast<OpenglControl *>(context);
+    if (openglControl != NULL) {
+        openglControl->baseOpengl->destroy();
+    }
+}
+
 void OpenglControl::onCreateSurface(JNIEnv *env, jobject surface) {
     nativeWindow = ANativeWindow_fromSurface(env, surface);
     eglThread = new EglThread();
@@ -50,8 +77,10 @@ void OpenglControl::onCreateSurface(JNIEnv *env, jobject surface) {
     eglThread->callBackOnCeate(callbackSurfaceCreate, this);
     eglThread->callBackOnChange(callbackSurfaceChange, this);
     eglThread->callBackOnDraw(callbackSurfaceDraw, this);
+    eglThread->callBackOnChangeFilter(callbackSurfaceChangeFilter, this);
+    eglThread->callBackOnDestroy(callbackSurfaceDestroy, this);
 
-    baseOpengl = new ImgOpengl();
+    baseOpengl = new YUVOpengl();
 
     eglThread->onSurfaceCreate(nativeWindow);
 }
@@ -59,21 +88,17 @@ void OpenglControl::onCreateSurface(JNIEnv *env, jobject surface) {
 
 void OpenglControl::onChangeSurface(int width, int height) {
     if (eglThread != NULL) {
-        if (baseOpengl != NULL) {
-            baseOpengl->surfaceWidth = width;
-            baseOpengl->surfaceHeight = height;
-        }
         eglThread->onSurfaceChange(width, height);
     }
 }
 
 
-void OpenglControl::onDestorySurface() {
+void OpenglControl::onDestroySurface() {
     if (eglThread != NULL) {
-        eglThread->destory();
+        eglThread->destroy();
     }
     if (baseOpengl != NULL) {
-        baseOpengl->destory();
+        baseOpengl->destroy();
         delete baseOpengl;
         baseOpengl = NULL;
     }
@@ -88,12 +113,30 @@ void OpenglControl::onDestorySurface() {
 void OpenglControl::setPixel(void *data, int width, int height, int length) {
     imgHeight = height;
     imgWidth = width;
-
+    if (pixel != NULL) {
+        free(pixel);
+        pixel = NULL;
+    }
     pixel = malloc(length);
     memcpy(pixel, data, length);
 
     if (baseOpengl != NULL) {
         baseOpengl->setPixel(pixel, width, height);
+    }
+    if (eglThread != NULL) {
+        eglThread->notifyRender();
+    }
+}
+
+void OpenglControl::onChangeFilterSurface() {
+    if (eglThread != NULL) {
+        eglThread->onSurfaceChangeFilter();
+    }
+}
+
+void OpenglControl::setYuvData(void *y, void *u, void *v, int width, int height) {
+    if (baseOpengl != NULL) {
+        baseOpengl->setYuvData(y, u, v, width, height);
     }
     if (eglThread != NULL) {
         eglThread->notifyRender();

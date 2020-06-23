@@ -1,16 +1,22 @@
 package me.shiki.nativeopengldemo
 
+import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import java.nio.ByteBuffer
 
 class MainActivity : AppCompatActivity() {
 
-    val nativeOpengl by lazy {
+    private val nativeOpengl by lazy {
         NativeOpengl()
     }
+
+    private val imgs: IntArray = intArrayOf(R.drawable.test01, R.drawable.test02, R.drawable.test03)
+
+    private var index = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -18,8 +24,27 @@ class MainActivity : AppCompatActivity() {
         osv.nativeOpengl = nativeOpengl
 
         osv.surfaceCreatedListener = {
-            val bitmap = BitmapFactory.decodeResource(resources, R.drawable.test)
-            val buffer = ByteBuffer.allocate(bitmap.height * bitmap.width * 4);
+            readPixel(imgs[index])
+        }
+        btn_filter.setOnClickListener {
+            nativeOpengl.surfaceChangeFilter()
+        }
+        btn_texture.setOnClickListener {
+            index++
+            if (index >= imgs.size) {
+                index = 0
+            }
+            readPixel(imgs[index])
+        }
+        btn_yuv.setOnClickListener {
+            startActivity(Intent(this, YUVPlayerActivity::class.java))
+        }
+    }
+
+    private fun readPixel(resId: Int) {
+        var bitmap: Bitmap? = BitmapFactory.decodeResource(resources, resId)
+        if (bitmap != null) {
+            val buffer = ByteBuffer.allocate(bitmap.height * bitmap.width * 4)
             bitmap.copyPixelsToBuffer(buffer)
             buffer.flip()
             val pixels = buffer.array()

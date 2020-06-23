@@ -26,8 +26,8 @@ BaseOpengl::BaseOpengl() {
 }
 
 BaseOpengl::~BaseOpengl() {
-    delete []vertexs;
-    delete []fragments;
+    delete[]vertexs;
+    delete[]fragments;
 }
 
 void BaseOpengl::onCreate() {
@@ -35,17 +35,27 @@ void BaseOpengl::onCreate() {
 }
 
 void BaseOpengl::onChange(int width, int height) {
-
+    surfaceHeight = height;
+    surfaceWidth = width;
 }
 
 void BaseOpengl::onDraw() {
 
 }
 
-void BaseOpengl::destory() {
-
+void BaseOpengl::destroy() {
+    glDeleteTextures(1, &textureId);
+    glDetachShader(program, vertexShader);
+    glDetachShader(program, fragmentShader);
+    glDeleteShader(fragmentShader);
+    glDeleteShader(vertexShader);
+    glDeleteProgram(program);
 }
 
 void BaseOpengl::setPixel(void *data, int width, int height) {
+
+}
+
+void BaseOpengl::setYuvData(void *y, void *u, void *v, int width, int height) {
 
 }

@@ -21,6 +21,10 @@ public:
     char *vertex;
     char *fragment;
 
+    GLuint vertexShader;
+    GLuint fragmentShader;
+    GLuint textureId;
+
 
     float *vertexs;
     float *fragments;
@@ -38,9 +42,11 @@ public:
 
     virtual void onDraw();
 
-    virtual void destory();
+    virtual void destroy();
 
     virtual void setPixel(void *data, int width, int height);
+
+    virtual void setYuvData(void *y, void *u, void *v, int width, int height);
 };
 
 

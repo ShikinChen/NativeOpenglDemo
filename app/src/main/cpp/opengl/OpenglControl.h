@@ -31,10 +31,13 @@ public:
 
     void onChangeSurface(int width, int height);
 
-    void onDestorySurface();
+    void onChangeFilterSurface();
+
+    void onDestroySurface();
 
     void setPixel(void *data, int width, int height, int length);
 
+    void setYuvData(void *y, void * u, void * v, int width,int height);
 };
 
 

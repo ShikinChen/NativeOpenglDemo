@@ -27,10 +27,13 @@ public:
 
     void onSurfaceChange(int width, int height);
 
+    void onSurfaceChangeFilter();
+
     bool isCreate = false;
     bool isChange = false;
     bool isExit = false;
     bool isStart = false;
+    bool isChangeFilter = false;
 
     int surfaceWidth = 0;
     int surfaceHeight = 0;
@@ -61,6 +64,18 @@ public:
     void *onDrawContext;
 
 
+    typedef void (*OnChangeFilter)(int width, int height, void *context);
+
+    OnChangeFilter onChangeFilter;
+    void *onChangeFilterContext;
+
+
+    typedef void (*OnDestroy)(void *context);
+
+    OnDestroy onDestroy;
+    void *onDestroyContext;
+
+
     EglThread();
 
     virtual ~EglThread();
@@ -71,11 +86,15 @@ public:
 
     void callBackOnDraw(OnDraw onDraw, void *context);
 
+    void callBackOnChangeFilter(OnChangeFilter onChangeFilter, void *context);
+
+    void callBackOnDestroy(OnDestroy onDestroy, void *context);
+
     void setRenderType(RenderType renderType);
 
     void notifyRender();
 
-    void destory();
+    void destroy();
 };
 
 

@@ -26,7 +26,7 @@ class OpenGLSurfaceView @JvmOverloads constructor(
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        nativeOpengl?.surfaceDestory()
+        nativeOpengl?.surfaceDestroy()
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {

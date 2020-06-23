@@ -38,6 +38,15 @@ void *eglThreadImpl(void *data) {
 
         }
 
+        if (eglThread->isChangeFilter) {
+            LOGD("eglThread ChangeFilter")
+            eglThread->isChangeFilter = false;
+            if (eglThread->onChangeFilter != NULL) {
+                eglThread->onChangeFilter(eglThread->surfaceWidth, eglThread->surfaceHeight,
+                                          eglThread->onChangeContext);
+            }
+        }
+
         if (eglThread->isStart) {
 //            LOGD("onDraw")
             if (eglThread->onDraw != NULL) {
@@ -54,7 +63,10 @@ void *eglThreadImpl(void *data) {
             pthread_mutex_unlock(&eglThread->pthreadMutex);
         }
     }
-    eglHelper->destoryEgl();
+    if (eglThread->onDestroy != NULL) {
+        eglThread->onDestroy(eglThread->onDestroyContext);
+    }
+    eglHelper->destroyEgl();
     delete eglHelper;
     eglHelper = NULL;
     return 0;
@@ -101,10 +113,25 @@ void EglThread::notifyRender() {
     pthread_mutex_unlock(&pthreadMutex);
 }
 
-void EglThread::destory() {
+void EglThread::destroy() {
     isExit = true;
     notifyRender();
     pthread_join(eglThread, NULL);
     nativeWindow = NULL;
     eglThread = -1;
+}
+
+void EglThread::callBackOnChangeFilter(EglThread::OnChangeFilter onChangeFilter, void *context) {
+    this->onChangeFilter = onChangeFilter;
+    onChangeFilterContext = context;
+}
+
+void EglThread::onSurfaceChangeFilter() {
+    isChangeFilter = true;
+    notifyRender();
+}
+
+void EglThread::callBackOnDestroy(EglThread::OnDestroy onDestroy, void *context) {
+    this->onDestroy = onDestroy;
+    onDestroyContext = context;
 }

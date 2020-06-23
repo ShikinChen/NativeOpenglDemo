@@ -29,15 +29,18 @@ static int loadShaders(int shaderType, const char *code) {
  * @param fragment 片元源码
  * @return
  */
-static int createProgram(const char *vertex, const char *fragment) {
-    int vertexShader = loadShaders(GL_VERTEX_SHADER, vertex);
-    int fragmentShader = loadShaders(GL_FRAGMENT_SHADER, fragment);
+static int createProgram(const char *vertex, const char *fragment, GLuint *vShader, GLuint *fShader) {
+    GLuint vertexShader = loadShaders(GL_VERTEX_SHADER, vertex);
+    GLuint fragmentShader = loadShaders(GL_FRAGMENT_SHADER, fragment);
     int program = glCreateProgram();
     //将着色器程序添加到渲染程序中
     glAttachShader(program, vertexShader);
     glAttachShader(program, fragmentShader);
     //链接源程序
     glLinkProgram(program);
+
+    *vShader = vertexShader;
+    *fShader = fragmentShader;
     return program;
 }
 

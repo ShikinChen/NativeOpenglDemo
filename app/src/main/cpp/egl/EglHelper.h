@@ -26,7 +26,7 @@ public:
 
     int swapBuffers();
 
-    void destoryEgl();
+    void destroyEgl();
 };
 
 

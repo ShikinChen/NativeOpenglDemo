@@ -15,7 +15,7 @@ public:
     GLint v_Position;
     GLint f_Position;
     GLint sTexture;
-    GLuint textureId;
+
     GLuint u_Matrix;
 
     int width;
@@ -37,6 +37,7 @@ public:
     void setOrthoM();
 
     void setPixel(void *data, int width, int height);
+
 };
 
 

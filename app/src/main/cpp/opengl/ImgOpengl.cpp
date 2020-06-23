@@ -28,7 +28,7 @@ void ImgOpengl::onCreate() {
                "    gl_FragColor=texture2D(sTexture, ft_Position);\n"
                "}";
 
-    program = createProgram(vertex, fragment);
+    program = createProgram(vertex, fragment, &vertexShader, &fragmentShader);
     LOGD("opengl program %d", program)
 
 
@@ -56,6 +56,7 @@ void ImgOpengl::onCreate() {
 }
 
 void ImgOpengl::onChange(int width, int height) {
+    BaseOpengl::onChange(width, height);
     glViewport(0, 0, width, height);
     setOrthoM();
 }
@@ -113,3 +114,4 @@ void ImgOpengl::setPixel(void *data, int width, int height) {
     this->height = height;
     setOrthoM();
 }
+

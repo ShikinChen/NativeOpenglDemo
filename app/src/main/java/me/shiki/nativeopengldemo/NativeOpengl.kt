@@ -19,5 +19,9 @@ class NativeOpengl {
 
     external fun imgData(width: Int, height: Int, length: Int, data: ByteArray)
 
-    external fun surfaceDestory()
+    external fun setYuvData(y: ByteArray, u: ByteArray, v: ByteArray, width: Int, height: Int)
+
+    external fun surfaceDestroy()
+
+    external fun surfaceChangeFilter()
 }
