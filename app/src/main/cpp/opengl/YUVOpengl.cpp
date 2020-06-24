@@ -3,7 +3,6 @@
 //
 
 #include "YUVOpengl.h"
-
 YUVOpengl::YUVOpengl() {
 
     vertex = "attribute vec4 v_Position;\n"
@@ -94,12 +93,12 @@ void YUVOpengl::onDraw() {
     glUniformMatrix4fv(uMatrix, 1, GL_FALSE, matrix);
 
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-
     glEnableVertexAttribArray(vPosition);
     glVertexAttribPointer(vPosition, 2, GL_FLOAT, false, 8, 0);
 
     glEnableVertexAttribArray(fPosition);
     glVertexAttribPointer(fPosition, 2, GL_FLOAT, false, 8, (char *) 0 + vertexsSize * 4);
+
 
     if (yuvHeight > 0 && yuvWidth > 0) {
         if (y != NULL) {

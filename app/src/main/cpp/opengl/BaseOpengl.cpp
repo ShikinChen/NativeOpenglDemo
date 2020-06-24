@@ -34,6 +34,7 @@ BaseOpengl::~BaseOpengl() {
 }
 
 void BaseOpengl::onCreate() {
+    //创建vbo
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -42,8 +43,10 @@ void BaseOpengl::onCreate() {
     glBufferSubData(GL_ARRAY_BUFFER, 0, vertexsSize * 4, vertexs);
 
     glBufferSubData(GL_ARRAY_BUFFER, vertexsSize * 4, fragmentsSize * 4, fragments);
-
     glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    //创建fbo
+    glGenFramebuffers(1, &fbo);
 }
 
 void BaseOpengl::onChange(int width, int height) {
@@ -57,6 +60,7 @@ void BaseOpengl::onDraw() {
 
 void BaseOpengl::destroy() {
     glDeleteBuffers(1, &vbo);
+    glDeleteFramebuffers(1, &fbo);
     glDeleteTextures(1, &textureId);
     glDetachShader(program, vertexShader);
     glDetachShader(program, fragmentShader);

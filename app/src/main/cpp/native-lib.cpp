@@ -9,15 +9,47 @@
 #include "util/ShaderUtil.h"
 #include "matrix/MatrixUtil.h"
 #include "opengl/OpenglControl.h"
+#include <unordered_map>
+#include "CallJava.h"
 
+using namespace std;
 OpenglControl *openglControl = NULL;
+CallJava *callJava = NULL;
+JavaVM *javaVm = NULL;
+static std::unordered_map<int, OpenglControl *> *g_instanceDic;
 
+extern "C"
+JNIEXPORT JNICALL jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    javaVm = vm;
+    JNIEnv *env;
+    if (vm->GetEnv(reinterpret_cast<void **>(&env), JNI_VERSION_1_6) != JNI_OK) {
+        return -1;
+    }
+    return JNI_VERSION_1_6;
+}
 
 extern "C"
 JNIEXPORT void JNICALL
 Java_me_shiki_nativeopengldemo_NativeOpengl_surfaceCreate(JNIEnv *env, jobject thiz, jobject surface) {
+
+    if (callJava == NULL) {
+        callJava = new CallJava(javaVm, env, &thiz);
+    }
+    int hashCode = callJava->onCallHashCode(&thiz);
+    if (hashCode < 0) {
+        return;
+    }
+    openglControl = NULL;
+    if (g_instanceDic == NULL) {
+        g_instanceDic = new unordered_map<int, OpenglControl *>;
+    }
+    auto itr = g_instanceDic->find(hashCode);
+    if (itr != g_instanceDic->end()) {
+        openglControl = itr->second;
+    }
     if (openglControl == NULL) {
         openglControl = new OpenglControl();
+        (*g_instanceDic)[hashCode] = openglControl;
     }
     openglControl->onCreateSurface(env, surface);
 
@@ -47,9 +79,20 @@ Java_me_shiki_nativeopengldemo_NativeOpengl_imgData(JNIEnv *env, jobject thiz, j
 JNIEXPORT void JNICALL
 Java_me_shiki_nativeopengldemo_NativeOpengl_surfaceDestroy(JNIEnv *env, jobject thiz) {
     if (openglControl != NULL) {
-        openglControl->onDestroySurface();
-        delete openglControl;
-        openglControl = NULL;
+
+        int hashCode = callJava->onCallHashCode(&thiz);
+        if (hashCode >= 0) {
+            auto itr = g_instanceDic->find(hashCode);
+            if (itr != g_instanceDic->end()) {
+                OpenglControl *openglControl = itr->second;
+                openglControl->onDestroySurface();
+                delete openglControl;
+                g_instanceDic->erase(hashCode);
+            }
+        }
+
+
+//        openglControl = NULL;
     }
 }extern "C"
 JNIEXPORT void JNICALL

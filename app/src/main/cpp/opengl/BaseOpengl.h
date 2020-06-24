@@ -31,6 +31,7 @@ public:
 
     GLuint program;
     GLuint vbo;
+    GLuint fbo;
 
     int vertexsSize=0;
     int fragmentsSize=0;
