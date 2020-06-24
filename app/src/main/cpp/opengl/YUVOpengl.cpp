@@ -57,6 +57,7 @@ void YUVOpengl::freeYUV() {
 }
 
 void YUVOpengl::onCreate() {
+    BaseOpengl::onCreate();
     program = createProgram(vertex, fragment, &vertexShader, &fragmentShader);
     vPosition = glGetAttribLocation(program, "v_Position");//顶点坐标
     fPosition = glGetAttribLocation(program, "f_Position");//纹理坐标
@@ -64,6 +65,7 @@ void YUVOpengl::onCreate() {
     samplerU = glGetUniformLocation(program, "sampler_u");
     samplerV = glGetUniformLocation(program, "sampler_v");
     uMatrix = glGetUniformLocation(program, "u_Matrix");
+
 
     glGenTextures(3, samplers);
     for (int i = 0; i < 3; ++i) {
@@ -91,11 +93,13 @@ void YUVOpengl::onDraw() {
 
     glUniformMatrix4fv(uMatrix, 1, GL_FALSE, matrix);
 
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
     glEnableVertexAttribArray(vPosition);
-    glVertexAttribPointer(vPosition, 2, GL_FLOAT, false, 8, vertexs);
+    glVertexAttribPointer(vPosition, 2, GL_FLOAT, false, 8, 0);
 
     glEnableVertexAttribArray(fPosition);
-    glVertexAttribPointer(fPosition, 2, GL_FLOAT, false, 8, fragments);
+    glVertexAttribPointer(fPosition, 2, GL_FLOAT, false, 8, (char *) 0 + vertexsSize * 4);
 
     if (yuvHeight > 0 && yuvWidth > 0) {
         if (y != NULL) {
@@ -119,8 +123,9 @@ void YUVOpengl::onDraw() {
                          v);
             glUniform1i(samplerV, 2);
         }
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, vertexsSize / 2);
         glBindTexture(GL_TEXTURE_2D, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
     }
 
 }

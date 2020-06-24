@@ -21,6 +21,9 @@ BaseOpengl::BaseOpengl() {
             0, 1,
             0, 0,
     };
+    vertexsSize = sizeof(v) / sizeof(float);
+    fragmentsSize = sizeof(f) / sizeof(float);
+
     memcpy(vertexs, v, sizeof(v));
     memcpy(fragments, f, sizeof(f));
 }
@@ -31,7 +34,16 @@ BaseOpengl::~BaseOpengl() {
 }
 
 void BaseOpengl::onCreate() {
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
+    glBufferData(GL_ARRAY_BUFFER, vertexsSize * 4 + fragmentsSize * 4, NULL, GL_STATIC_DRAW);
+
+    glBufferSubData(GL_ARRAY_BUFFER, 0, vertexsSize * 4, vertexs);
+
+    glBufferSubData(GL_ARRAY_BUFFER, vertexsSize * 4, fragmentsSize * 4, fragments);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 void BaseOpengl::onChange(int width, int height) {
@@ -44,6 +56,7 @@ void BaseOpengl::onDraw() {
 }
 
 void BaseOpengl::destroy() {
+    glDeleteBuffers(1, &vbo);
     glDeleteTextures(1, &textureId);
     glDetachShader(program, vertexShader);
     glDetachShader(program, fragmentShader);

@@ -30,7 +30,10 @@ public:
     float *fragments;
 
     GLuint program;
+    GLuint vbo;
 
+    int vertexsSize=0;
+    int fragmentsSize=0;
 
     BaseOpengl();
 
