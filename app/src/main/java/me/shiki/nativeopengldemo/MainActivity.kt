@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         btn_yuv.setOnClickListener {
             startActivity(Intent(this, YUVPlayerActivity::class.java))
         }
+        btn_go_texture.setOnClickListener {
+            startActivity(Intent(this, TextureActivity::class.java))
+        }
     }
 
     private fun readPixel(resId: Int) {
